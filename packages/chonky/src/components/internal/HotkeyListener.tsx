@@ -14,10 +14,11 @@ import { thunkRequestFileAction } from '../../redux/thunks/dispatchers.thunks';
 
 export interface HotkeyListenerProps {
     fileActionId: string;
+    parentDivRef: React.RefObject<HTMLDivElement>;
 }
 
 export const HotkeyListener: React.FC<HotkeyListenerProps> = React.memo(props => {
-    const { fileActionId } = props;
+    const { fileActionId, parentDivRef } = props;
 
     const dispatch = useDispatch();
     const fileAction = useParamSelector(selectFileActionData, fileActionId);
@@ -26,15 +27,18 @@ export const HotkeyListener: React.FC<HotkeyListenerProps> = React.memo(props =>
         if (!fileAction || !fileAction.hotkeys || fileAction.hotkeys.length === 0) {
             return;
         }
+        if (!parentDivRef.current) {
+            return;
+        }
 
         const hotkeysStr = fileAction.hotkeys.join(',');
         const hotkeyCallback = (event: KeyboardEvent) => {
             event.preventDefault();
             dispatch(thunkRequestFileAction(fileAction, undefined));
         };
-        hotkeys(hotkeysStr, hotkeyCallback);
+        hotkeys(hotkeysStr, { element: parentDivRef.current }, hotkeyCallback);
         return () => hotkeys.unbind(hotkeysStr, hotkeyCallback);
-    }, [dispatch, fileAction]);
+    }, [dispatch, fileAction, parentDivRef]);
 
     return null;
 });

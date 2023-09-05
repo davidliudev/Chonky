@@ -34,6 +34,8 @@ export const ChonkyPresentationLayer: React.FC<ChonkyPresentationLayerProps> = (
         selectClearSelectionOnOutsideClick
     );
 
+    const divRef = React.useRef<HTMLDivElement>(null);
+
     // Deal with clicks outside of Chonky
     const handleClickAway = useCallback(
         (event: React.MouseEvent<Document>) => {
@@ -56,6 +58,7 @@ export const ChonkyPresentationLayer: React.FC<ChonkyPresentationLayerProps> = (
                 <HotkeyListener
                     key={`file-action-listener-${actionId}`}
                     fileActionId={actionId}
+                    parentDivRef={divRef}
                 />
             )),
         [fileActionIds]
@@ -66,13 +69,15 @@ export const ChonkyPresentationLayer: React.FC<ChonkyPresentationLayerProps> = (
 
     const classes = useStyles();
     return (
-        <ClickAwayListener onClickAway={handleClickAway}>
-            <Box className={classes.chonkyRoot} onContextMenu={showContextMenu}>
-                {!dndDisabled && dndContextAvailable && <DnDFileListDragLayer />}
-                {hotkeyListenerComponents}
-                {children ? children : null}
-            </Box>
-        </ClickAwayListener>
+        <div className={classes.container} ref={divRef}>
+            <ClickAwayListener onClickAway={handleClickAway}>
+                <Box className={classes.chonkyRoot} onContextMenu={showContextMenu}>
+                    {!dndDisabled && dndContextAvailable && <DnDFileListDragLayer />}
+                    {hotkeyListenerComponents}
+                    {children ? children : null}
+                </Box>
+            </ClickAwayListener>
+        </div>
     );
 };
 
@@ -98,5 +103,10 @@ const useStyles = makeGlobalChonkyStyles(theme => ({
         mozUserSelect: 'none',
         msUserSelect: 'none',
         userSelect: 'none',
+    },
+
+    container: {
+        height: '100%',
+        width: '100%',
     },
 }));
